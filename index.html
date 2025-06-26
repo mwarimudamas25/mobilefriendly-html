@@ -16,8 +16,8 @@
       
     }
     .custom-button {
-      width: 130px;
-      height: 44px;
+      width: 160px;
+      height: 50px;
       background-color: blue;
       color: white;
       border: none;
@@ -81,6 +81,19 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+     .warning-text {
+    color: red;
+    font-weight: bold;
+    animation: shake 0.5s ease-in-out;
+  }
+
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+    }
   </style>
 </head>
 <body>
@@ -90,14 +103,15 @@
 <div id="password-modal">
   <div class="modal-content">
     <span onclick="closeModal()" class="close-btn">&times;</span>
-    <h3>Shyiramo Kode y'Ikizamini</h3>
-    <input type="password" id="password-input" placeholder="Andika kode hano">
+    <h3>SHYIRAMO KODE IKWEMERERA GUKORA IKI KIZAMI</h3>
+    <input type="password" id="password-input" placeholder="ANDIKA IYO KODE HANO">
     <br><br>
-    <button id="confirmBtn" onclick="checkPassword()">Emeza</button>
+    <button id="confirmBtn" onclick="checkPassword()">EMEZA NYUMA YO KWANDIKAMO KODE</button>
     <br><br>
-    <button id="exitGoBackBtn" onclick="closeModal()">Subira Inyuma</button>
+    <button id="exitSectionBtn" onclick="exitToSection()">KANDA HANO USABE KODE</button>
     <br><br>
-    <button id="exitSectionBtn" onclick="exitToSection()">Sohoka</button>
+    <button id="exitGoBackBtn" onclick="closeModal()">SOHOKA NIBA UDASHAKA GUKOMEZA</button>
+   
   </div>
 </div>
 <style>
@@ -116,16 +130,16 @@
     background-color: #fff;
     margin: 10% auto;
     padding: 20px;
-    width: 90%;
+    width: 50%;
     max-width: 400px;
     border-radius: 10px;
     text-align: center;
     position: relative;
   }
  .modal-content input {
-    width: 90%;
+    width: 50%;
     padding: 10px;
-    font-size: 10px;
+    font-size: 16px;
   }
 
   button {
@@ -144,18 +158,16 @@
   #confirmBtn:hover {
     background-color: #0056b3;
   }
-
-  #exitGoBackBtn {
+    #exitSectionBtn {
     background-color: gray;
   }
-  #exitGoBackBtn:hover {
+  #exitSectionBtn:hover {
     background-color: #555;
   }
-
-  #exitSectionBtn {
+  #exitGoBackBtn {
     background-color: darkred;
   }
-  #exitSectionBtn:hover {
+  #exitGoBackBtn:hover {
     background-color: #b30000;
   }
 
@@ -169,11 +181,12 @@
 </style>
 
   <div id="quiz-container">
+<h3 id="quiz-started-msg" class="warning-text">IKIZAMI CYAMAZE GUTANGIRA...</h3>
+ <div id="timer" style="font-weight:bold; margin-bottom: 20px;">IGIHE GISIGAYE: 20:00</div>
 <p>IKIZAMI KIGIZWE N'IBIBAZO 20, BURI KIBAZO GIFITE INOTA 1, KIKAMARA IMINOTA 20. AMAHIRWE MASA!!!</p>
-    <div id="timer" style="font-weight:bold; margin-bottom: 20px;">IGIHE GISIGAYE: 20:00</div>
     <div id="question-container"></div>
     <button class="submit-button" onclick="submitQuiz()">OHEREZA UBONE AMANOTA YAWE</button>
-    <button class="home-button" onclick="goToHome()">SOHOKA/JYA KU BINDI BIZAMI</button>
+    <button class="home-button" onclick="goToHome()">SOHOKA/SUBIRA KU BIZAMI</button>
     <div id="loadingSpinner"></div>
     <div id="result-message" style="display: flex; align-items: center; gap: 10px;"></div>
     <div class="bottom-buttons">
@@ -392,14 +405,17 @@ const questions = [
 
   function promptPassword() {
   if (quizStarted) {
-    alert("IKIZAMI CYAMAZE GUTANGIRA! KANDA OK UKOMEZE CG UJYE KURI SOHOKA UJYE GUTANGIRA BUSHYA");
+    alert("IKIZAMI CYAMAZE GUTANGIRA! KANDA OK UKOMEZE CG UJYE KURI SOHOKA USUBIRE KU BIZAMI WONGERE UTANGIRE");
     return;
   }
   document.getElementById("password-modal").style.display = "block";
+document.querySelector(".custom-button").style.display = "none"; // 👈 Hide the start button
 }
 
 function checkPassword() {
-const input = document.getElementById("password-input").value;
+  const inputField = document.getElementById("password-input");
+  const input = inputField.value;
+
   if (input === password) {
     document.getElementById("password-modal").style.display = "none";
     document.getElementById("quiz-container").style.display = "block";
@@ -407,12 +423,11 @@ const input = document.getElementById("password-input").value;
     renderQuestions();
     startTimer();
   } else {
-    alert("SHYIRAMO KODE YA NYAYO CG UTWANDIKIRE KURI 0785677190 TUGUFASHE!");
+    alert("ANDIKAMO KODE YA NYAYO CG UJYE AHANDITSE @KANDA HANO USABE KODE@ TUGUFASHE!");
+    inputField.value = "";       // isiba automatic
+    inputField.focus();          // cursor isubira mu kibuga
   }
 }
-      
-    
-
     function renderQuestions() {
       const container = document.getElementById("question-container");
       container.innerHTML = "";
@@ -447,7 +462,7 @@ const input = document.getElementById("password-input").value;
     }
 
     function submitQuiz() {
-      if (submitted) return alert("IKIZAMI CYAMAZE KOHEREZWA, KANDA KURI OK USOHOKE UJYE GUTANGIRA IKIZAMI BUSHYA !");
+      if (submitted) return alert("IKIZAMI CYAMAZE KOHEREZWA, KANDA KURI OK UJYE KURI @SOHOKA/SUBIRA KU BIZAMI@ WONGERE UTANGIRE !");
       submitted = true;
       let score = 0;
       for (let i = 0; i < questions.length; i++) {
@@ -480,6 +495,11 @@ const input = document.getElementById("password-input").value;
   document.getElementById("question-container").innerHTML = output;
       window.scrollTo({ top: 0, behavior: "smooth" });
 }
+setTimeout(function() {
+  const msg = document.getElementById("quiz-started-msg");
+  if (msg) msg.style.display = "none";
+}, 60000); // 60000 milliseconds = 1 minute
+
 function exitToSection() {
   document.getElementById("password-modal").style.display = "none";
   window.location.href = "https://mwarimudamas.wixsite.com/mwarimudamas#contact-us";
