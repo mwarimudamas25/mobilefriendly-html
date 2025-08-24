@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ibizamini No.1 - No.10</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 20px; padding: 20px; background: #fff; margin: 0; }
+    h3 { text-align: center; }
+    .custom-button {
+      width: 300px; height: 40px; background-color: blue; color: white;
+      border: none; font-size: 20px; font-weight: bold; cursor: pointer;
+      margin: 10px auto; display: block;
+    }
+    .custom-button:hover { background-color: darkblue; }
+    /* Password Modal Styles */
+    #password-modal {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);
+      overflow: auto;
+    }
+    .modal-content {
+      background-color: #fff; margin: 10% auto; padding: 20px;
+      width: 90%; max-width: 400px; border-radius: 10px; text-align: center;
+      position: relative;
+    }
+    .modal-content input[type="password"] {
+      width: 90%; padding: 10px; font-size: 16px;
+    }
+    .close-btn {
+      position: absolute; right: 15px; top: 10px;
+      font-size: 20px; cursor: pointer;
+    }
+    #confirmBtn {
+      background-color: #007bff; color: white;
+      width: 100%; padding: 10px; border: none; border-radius: 6px;
+      margin-top: 10px; cursor: pointer;
+    }
+    #confirmBtn:hover { background-color: #0056b3; }
+
+    /* Quiz Container Styles */
+    .quiz-container { display: none; padding: 20px; background: #fff; width: 100%; box-sizing: border-box; }
+    #timer1, #timer2, #timer3, /* ... #timer10 ... */ { font-weight: bold; color: red; margin-bottom: 10px; }
+    .question { font-weight: bold; margin-bottom: 20px; }
+    .option-button {
+      font-weight: normal; display: block; margin: 12px 0;
+      padding: 10px; border: 2px solid #ccc; border-radius: 6px;
+      background-color: white; cursor: pointer; font-size: 20px;
+    }
+    .option-button:hover { background-color: #eef; }
+    .option-button.correct {
+      background-color: #c8f7c5 !important; border-color: forestgreen;
+    }
+    .option-button.wrong {
+      background-color: #f7c5c5 !important; border-color: red;
+    }
+    input[type="radio"] {
+      transform: scale(1.5); margin: 10px; accent-color: #007bff; cursor: pointer;
+    }
+    input[type="radio"]:checked {
+      outline: 2px solid #007bff; box-shadow: 0 0 5px #007bff;
+    }
+    .quiz-submitted input[type="radio"]:checked {
+      accent-color: forestgreen; outline: 2px solid #007bff; box-shadow: 0 0 5px #007bff;
+    }
+    .correct::after {
+      content: " ✅ "; color: green; margin-left: 4px; font-weight: bold;
+    }
+    .wrong::after {
+      content: " ❌ (Icyo wasubije si cyo. Reba igisubizo cy'ukuri mu ibara ry'icyatsi.)";
+      color: red; margin-left: 4px; font-weight: bold;
+    }
+    .submit-button, .review-button, .home-button {
+      width: 300px; height: 50px; color: white; border: none;
+      font-size: 16px; font-weight: bold; cursor: pointer;
+      margin: 10px auto; display: block;
+    }
+    .submit-button { background-color: blue; }
+    .submit-button:hover { background-color: darkblue; }
+    .review-button { background-color: green; }
+    .review-button:hover { background-color: darkgreen; }
+    .home-button { background-color: darkred; }
+    .home-button:hover { background-color: red; }
+    #result1, #result2, #result3, /* ... #result10 ... */ { margin-top: 20px; font-weight: bold; text-align: center; }
+    .spinner-wrapper {
+      display: flex; align-items: center; justify-content: center;
+      margin: 20px 0; gap: 12px;
+    }
+    .spinner {
+      border: 6px solid #f3f3f3; border-top: 6px solid #3498db;
+      border-radius: 50%; width: 30px; height: 30px;
+      animation: spin 1s linear infinite;
+    }
+    .spinner-text { font-size: 20px; color: darkblue; font-weight: bold; }
+    @keyframes spin {
+      0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false" onload="showPasswordModal()">
+  <h3>ITOZE GUSUBIZA IBIBAZO UTSINDIRE PROVISOIRE MU GIHE GITO!</h3>
+<!-- Password Modal -->
+<div id="password-modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closePasswordModal()">&times;</span>
+    <h3>SHYIRAMO KODE IKWEMERERA KWINJIRA MURI QUIZZES</h3>
+    <div style="position: relative; display: inline-block; width: 100%;">
+      <input type="password" id="password-input" placeholder="ANDIKA KODE" oninput="showToggleText()">
+      <span id="show-text" onclick="togglePassword(true)"
+            style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
+                   color: black; cursor: pointer; font-size: 14px; display: none;">
+        👁️ Garagaza</span>
+      <span id="hide-text" onclick="togglePassword(false)"
+            style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
+                   color: black; cursor: pointer; font-size: 14px; display: none;">
+        😎 Hisha</span>
+    </div>
+    <button id="confirmBtn" onclick="checkPassword()">EMEZA KODE</button>
+  </div>
+</div>
+ 
+<!-- Quiz 1 Container (similar for Quiz2...Quiz10) -->
+<div id="quiz1-container" class="quiz-container">
+  <div id="timer1"></div>
+  <p><strong>Ikizamini kirimo ibibazo 20, buri kibazo gifite inota 1, ukimara iminota 20. Amahirwe masa!</strong></p>
+  <div id="question-box1"></div>
+  <div id="spinnerContainer1" class="spinner-wrapper" style="display:none;">
+    <div class="spinner"></div><span class="spinner-text">Ibibazo birimo gupimwa...</span>
+  </div>
+  <div id="result1"></div>
+  <button class="submit-button" id="submit1" onclick="submitQuiz()">SOHORA IKIZAMI</button>
+  <button class="review-button" id="review1" onclick="reviewAnswers()" style="display:none;">REBA IBISUBIZO</button>
+  <button class="home-button" onclick="backToSelection()">SOHOKA / JYA KU KIZAMI CYA 2</button>
+</div>
+
+  <!-- Quiz 2 Container -->
+  <div id="quiz2-container" class="quiz-container">
+    <div id="timer2"></div>
+    <p><strong>Ikizamini kirimo ibibazo 20, buri kibazo gifite inota 1, ukimara iminota 20. Amahirwe masa!</strong></p>
+    <div id="question-box2"></div>
+    <div id="spinnerContainer2" class="spinner-wrapper" style="display:none;">
+      <div class="spinner"></div><span class="spinner-text">Ibibazo birimo gupimwa...</span>
+    </div>
+    <div id="result2"></div>
+    <button class="submit-button" id="submit2" onclick="submitQuiz()">SOHORA IKIZAMI</button>
+    <button class="review-button" id="review2" onclick="reviewAnswers()" style="display:none;">REBA IBISUBIZO</button>
+    <button class="home-button" onclick="backToSelection()">SOHOKA / JYA KU KIZAMI CYA 3</button>
+  </div>
+
+  <!-- Quiz 3 Container -->
+  <div id="quiz3-container" class="quiz-container">
+    <div id="timer3"></div>
+    <p><strong>Ikizamini kirimo ibibazo 20, buri kibazo gifite inota 1, ukimara iminota 20. Amahirwe masa!</strong></p>
+    <div id="question-box3"></div>
+    <div id="spinnerContainer3" class="spinner-wrapper" style="display:none;">
+      <div class="spinner"></div><span class="spinner-text">Ibibazo birimo gupimwa...</span>
+    </div>
+    <div id="result3"></div>
+    <button class="submit-button" id="submit3" onclick="submitQuiz()">SOHORA IKIZAMI</button>
+    <button class="review-button" id="review3" onclick="reviewAnswers()" style="display:none;">REBA IBISUBIZO</button>
+    <button class="home-button" onclick="backToSelection()">SOHOKA / JYA KU KIZAMI CYA 4</button>
+  </div>
+
+  <!-- Repeat similarly for Quiz4 through Quiz10 containers... -->
+
+  <script>
+    // **Password Modal Functions**
+    function showPasswordModal() {
+      document.getElementById("password-modal").style.display = "block";
+    }
+    function closePasswordModal() {
+      const confirmClose = confirm("Urashaka gusubira inyuma? Kanda OK niba udashaka gukomeza, cyangwa CANCEL ukomeze.");
+      if (confirmClose) {
+        document.getElementById("password-modal").style.display = "none";
+      }
+    }
+    function togglePassword(show) {
+      const input = document.getElementById("password-input");
+      const showText = document.getElementById("show-text");
+      const hideText = document.getElementById("hide-text");
+      if (show) {
+        input.type = "text"; showText.style.display = "none"; hideText.style.display = "inline";
+      } else {
+        input.type = "password"; showText.style.display = "inline"; hideText.style.display = "none";
+      }
+    }
+    function showToggleText() {
+      const input = document.getElementById("password-input");
+      const showText = document.getElementById("show-text");
+      const hideText = document.getElementById("hide-text");
+      if (input.value.length > 0) {
+        if (input.type === "password") {
+          showText.style.display = "inline"; hideText.style.display = "none";
+        } else {
+          hideText.style.display = "inline"; showText.style.display = "none";
+        }
+      } else {
+        showText.style.display = "none"; hideText.style.display = "none";
+      }
+    }
+    function checkPassword() { 
+  const inputField = document.getElementById("password-input");
+  if (inputField.value === "1234") {
+    // Correct password: show quiz buttons in modal
+    const modalContent = document.querySelector("#password-modal .modal-content");
+
+    // Reset modal content
+    modalContent.innerHTML = "";
+
+    // Add "Go to Wix Section" button at top center
+    const wixBtn = document.createElement("button");
+    wixBtn.textContent = "SOHOKA/SUBIRA KU BIZAMI BYOSE";
+    wixBtn.className = "custom-button";
+    wixBtn.style.backgroundColor = "green";
+    wixBtn.style.display = "block";
+    wixBtn.style.margin = "0 auto 15px auto"; // center
+    wixBtn.onclick = function() { window.location.href = "https://icyapa.com/#quizzes"; };
+    modalContent.appendChild(wixBtn);
+
+    // Add title
+    const title = document.createElement("h3");
+    title.textContent = "HITAMO IKIZAMI";
+    modalContent.appendChild(title);
+
+    // Add quiz buttons
+    for (let i = 1; i <= 10; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = "Ikizamini No." + i;
+      btn.className = "custom-button";
+      btn.style.marginBottom = "10px";
+      btn.onclick = function() { openQuiz(i); };
+      modalContent.appendChild(btn);
+    }
+  } else {
+    alert("Kode si nyayo, subiramo. Niba utayifite, twandikire tubufashe.");
+    inputField.value = ""; 
+    inputField.focus();
+  }
+}
+
+    // **Quiz Data (placeholder)** 
+    // Each quiz has an array of {question, options, correct} objects.
+    // Replace with actual questions for Quiz1 through Quiz10.
+    const quizzes = {
+      1: {
+        questions: [
+          { question: "1. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+          { question: "2. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "3. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "4. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "5. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "6. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "7. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "8. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "9. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "10. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "11. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "12. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "13. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "14. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "15. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "16. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "17. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "18. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "19. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ { question: "20. Uretse ku byerekeye imihanda iromboreje y’ibisate byinshi n’imihanda yimodoka igice cy’umuhanda kiri hakurya y’umurongo mugari wera ucibwa ku          muhanda ngo ugaragaze inkombe mpimbano zawo kigenewe ibi bikurikira:", options: ["A. Guhagararwamo umwanya muto gusa", "B. Guhagararwamo umwanya munini gusa", "C. Guhagararwamo umwanya muto n’umunini", "D. Nta gisubizo cy’ukuri kirimo"], correct: 2 },
+ 
+     ]
+      },
+ 
+      2: {
+        questions: [
+          { question: "1. Ikibazo cya mbere cya Quiz2", options: ["a) ...", "b) ...", "c) ...", "d) ..."], correct: 2 },
+          { question: "2. Ikibazo cya kabiri cya Quiz2", options: ["a) ...", "b) ...", "c) ...", "d) ..."], correct: 3 },
+          // ... 18 more questions for Quiz2 ...
+        ]
+      },
+
+      3: {
+        questions: [
+          { question: "1. Ikibazo cya mbere cya Quiz3", options: ["a) ...", "b) ...", "c) ...", "d) ..."], correct: 1 },
+          { question: "2. Ikibazo cya kabiri cya Quiz3", options: ["a) ...", "b) ...", "c) ...", "d) ..."], correct: 0 },
+          // ...
+        ]
+      }
+      // ... similarly define quizzes 4 through 10 ...
+    };
+
+    // **State Variables**
+    let currentQuiz = null;
+    let userAnswers = [];
+    let correctAnswers = [];
+    let submitted = false;
+    let timer;  // interval ID
+    let time;   // remaining seconds
+
+    // **Open a Quiz** (called when clicking Ikizamini No.N)
+    function openQuiz(quizNumber) {
+      // Hide modal
+      document.getElementById("password-modal").style.display = "none";
+      // Hide any other quiz container
+      for (let i = 1; i <= 10; i++) {
+        const cont = document.getElementById("quiz" + i + "-container");
+        if (cont) cont.style.display = "none";
+      }
+      // Reset state
+      currentQuiz = quizNumber;
+      userAnswers = Array(20).fill(null);
+      submitted = false;
+      // Show selected quiz container
+      const quizContainer = document.getElementById("quiz" + quizNumber + "-container");
+      quizContainer.style.display = "block";
+      // Initialize timer (20 minutes)
+      time = 20 * 60;
+      document.getElementById("timer" + quizNumber).textContent = `Igihe Gisigaye: 20:00`;
+      clearInterval(timer);
+      timer = setInterval(function() {
+        time--;
+        const mins = Math.floor(time / 60);
+        const secs = time % 60;
+        document.getElementById("timer" + quizNumber).textContent =
+          `Igihe Gisigaye: ${mins}:${secs < 10 ? '0' + secs : secs}`;
+        if (time <= 0) {
+          clearInterval(timer);
+          if (!submitted) submitQuiz();
+        }
+      }, 1000);
+      // Load questions into the container
+      loadQuestions(quizNumber);
+      // Reset result area and hide review button
+      document.getElementById("result" + quizNumber).innerHTML = "";
+      document.getElementById("review" + quizNumber).style.display = "none";
+      document.getElementById("spinnerContainer" + quizNumber).style.display = "none";
+      // Scroll to top of page
+      window.scrollTo(0, 0);
+    }
+
+    function loadQuestions(quizNumber) {
+      const container = document.getElementById("question-box" + quizNumber);
+      let output = "";
+      correctAnswers = [];
+      const qs = quizzes[quizNumber].questions;
+      for (let i = 0; i < qs.length; i++) {
+        const q = qs[i];
+        correctAnswers.push(q.correct);
+        output += `<div class="question"><p><strong>${q.question}</strong></p>`;
+        for (let j = 0; j < q.options.length; j++) {
+          output += `<label class="option-button" id="q${i}_${j}">
+                     <input type="radio" name="q${i}" value="${j}" onchange="selectAnswer(${i}, ${j})">
+                     ${q.options[j]}</label>`;
+        }
+        output += `</div>`;
+      }
+      container.innerHTML = output;
+    }
+
+    function selectAnswer(qIndex, optIndex) {
+      userAnswers[qIndex] = optIndex;
+    }
+
+    function submitQuiz() {
+      if (submitted) {
+        alert("Ikizami cyarangiye! Kanda SOHOKA cyangwa SUBIRA KU BIZAMI.");
+        return;
+      }
+      submitted = true;
+      clearInterval(timer);
+      // Show loading spinner
+      document.getElementById("spinnerContainer" + currentQuiz).style.display = "flex";
+      document.getElementById("result" + currentQuiz).textContent = "Ihangane gato, amanota yawe arimo kubarwa...";
+      setTimeout(function() {
+        document.getElementById("spinnerContainer" + currentQuiz).style.display = "none";
+        // Calculate score
+        let score = 0;
+        for (let i = 0; i < correctAnswers.length; i++) {
+          if (userAnswers[i] === correctAnswers[i]) score++;
+        }
+        const resEl = document.getElementById("result" + currentQuiz);
+        resEl.innerHTML = `<span style="color:${score < 12 ? 'red' : 'green'};">
+          Wabonye Amanota: ${score}/20<br>
+          ${score < 12 ? 'Watsinzwe, komeza kwiga!' : 'Watsinze, komereza aho!'}</span>`;
+        // Disable all radio buttons
+        const radios = document.querySelectorAll(`#quiz${currentQuiz}-container input[type="radio"]`);
+        radios.forEach(r => r.disabled = true);
+        // Show review button
+        const reviewBtn = document.getElementById("review" + currentQuiz);
+        reviewBtn.style.display = "inline-block";
+        reviewBtn.scrollIntoView({ behavior: "smooth" });
+      }, 5000);
+    }
+
+    function reviewAnswers() {
+      window.scrollTo(0, 0);
+      // Highlight each answer
+      for (let i = 0; i < correctAnswers.length; i++) {
+        const userAns = userAnswers[i];
+        const correctAns = correctAnswers[i];
+        if (userAns !== null) {
+          if (userAns === correctAns) {
+            const label = document.getElementById(`q${i}_${userAns}`);
+            if (label) label.classList.add("correct");
+          } else {
+            const wrongLabel = document.getElementById(`q${i}_${userAns}`);
+            const correctLabel = document.getElementById(`q${i}_${correctAns}`);
+            if (wrongLabel) wrongLabel.classList.add("wrong");
+            if (correctLabel) correctLabel.classList.add("correct");
+          }
+        } else {
+          const correctLabel = document.getElementById(`q${i}_${correctAns}`);
+          if (correctLabel) correctLabel.classList.add("correct");
+        }
+      }
+      const reviewBtn = document.getElementById("review" + currentQuiz);
+      reviewBtn.style.display = "block";
+      reviewBtn.textContent = "ONGERA UREBE IBISUBIZO";
+    }
+
+  function backToSelection() {
+      // Hide current quiz and show selection modal again
+      document.getElementById("quiz" + currentQuiz + "-container").style.display = "none";
+      currentQuiz = null;
+      document.getElementById("password-modal").style.display = "block";
+    }
+  </script>   
+</body>
+</html>
